@@ -9,6 +9,7 @@
 import time
 from time import strftime
 import os
+import RPi.GPIO as GPIO
 
 import Adafruit_Nokia_LCD as LCD
 import Adafruit_GPIO.SPI as SPI
@@ -22,6 +23,10 @@ DC = 23
 RST = 24
 SPI_PORT = 0
 SPI_DEVICE = 0
+
+# GPIO setup
+GPIO.setmode(GPIO.BCM)
+GPIO.setup(17, GPIO.IN)
 
 def setup_screen():
 	# Hardware SPI usage:
@@ -63,13 +68,27 @@ def main():
 	time.tzset()
 	#clock loop
 	while True:
-		currenttime = strftime("%H:%M:%S")
+		curtime = strftime("%I:%M:%S %p")
+		weekday = strftime("%A")
+		curdate = strftime("%b %d, %Y")
 		disp.clear()
 		draw.rectangle((0, 0, LCD.LCDWIDTH, LCD.LCDHEIGHT), outline=255, fill=255)
-		draw.text((0, 0), currenttime, font=defaultfont)
+		draw.text((1, 0), curtime, font=defaultfont)
+		draw.text((1, 8), weekday, font=defaultfont)
+		draw.text((1, 16), curdate, font=defaultfont)
 		disp.image(image)
 		disp.display()
+		# exits script if button is pressed
+		if (GPIO.input(17) == False):
+			kill_clock(disp, image, draw)
 
+
+def kill_clock(disp, image, draw):
+	# function to properly shut down the clock
+	disp.clear()
+	draw.rectangle((0, 0, LCD.LCDWIDTH, LCD.LCDHEIGHT), outline=255, fill=255)
+	disp.display()
+	exit(0)		
 main()
 
 
