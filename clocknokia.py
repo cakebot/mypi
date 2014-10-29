@@ -7,6 +7,9 @@
 # DESCRIPTION: My first attempt at creating my Raspberry Pi clock
 
 import time
+from time import strftime
+import os
+
 import Adafruit_Nokia_LCD as LCD
 import Adafruit_GPIO.SPI as SPI
 
@@ -41,21 +44,31 @@ def main():
 	#draw a white canvas
 	draw.rectangle((0, 0, LCD.LCDWIDTH, LCD.LCDHEIGHT), outline=255, fill=255)
 	# show some boot up text
-	#font = ImageFont.load_default()
-	font = ImageFont.truetype('Minecraftia.ttf', 8)
-	draw.text((8,15), "Loading", font=font)
+	defaultfont = ImageFont.load_default()
+	#font = ImageFont.truetype('/home/pi/mypi/fonts/v5prophit_cell/V5PRC___.TTF', 16)
+	draw.text((8,15), "Loading", font=defaultfont)
 	disp.image(image)
 	disp.display()
 	location = 50
 	for i in range(0,3):	
-		draw.text((location, 15), ".", font=font)
+		draw.text((location, 15), ".", font=defaultfont)
 		disp.image(image)
 		disp.display()
 		location += 5
-		time.sleep(1)
-	time.sleep(3)
-	#clock loop
+		time.sleep(0.3)
+	time.sleep(1)
 	
+	#set timezone to EST
+	os.environ['TZ'] = 'US/Eastern'
+	time.tzset()
+	#clock loop
+	while True:
+		currenttime = strftime("%H:%M:%S")
+		disp.clear()
+		draw.rectangle((0, 0, LCD.LCDWIDTH, LCD.LCDHEIGHT), outline=255, fill=255)
+		draw.text((0, 0), currenttime, font=defaultfont)
+		disp.image(image)
+		disp.display()
 
 main()
 
